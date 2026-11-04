@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>婚宴座位查詢系統</title>
+<style>
+  /* 基礎重置與跨平台一致性設定 */
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  body {
+    margin: 0;
+    padding: 12px;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    color: #1e293b;
+    overflow-x: hidden;
+  }
+
+  .container { 
+    max-width: 600px; 
+    margin: auto; 
+    position: relative; 
+    z-index: 10; 
+    width: 100%;
+  }
+
+  /* 上方標題與資訊區 (讀取 bg.jpg 背景) */
+  .header-card {
+    background: url('bg.jpg') center center / cover no-repeat, linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+    border-radius: 20px;
+    padding: 24px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    width: 100%;
+    color: #ffffff;
+  }
+
+  .header-title { 
+    font-size: 24px; 
+    font-weight: 800; 
+    color: #ffffff; 
+    margin: 0 0 4px 0; 
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  .header-subtitle { 
+    color: #f1f5f9; 
+    font-size: 13px; 
+    margin: 6px 0 0 0; 
+    font-weight: 500; 
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  
+  /* 搜尋框卡片 */
+  .search-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border: 1px solid #f1f5f9;
+  }
+  .search-box { 
+    display: flex; 
+    gap: 8px; 
+  }
+  .search-box input { 
+    flex: 1; 
+    padding: 12px 16px; 
+    font-size: 15px; 
+    border-radius: 14px; 
+    border: 1.5px solid #e2e8f0; 
+    outline: none; 
+    background: #f8fafc; 
+    appearance: none;
+    -webkit-appearance: none; 
+    color: #1e293b;
+    transition: all 0.2s;
+  }
+  .search-box input:focus { 
+    border-color: #f43f5e; 
+    background: #fff; 
+    box-shadow: 0 0 0 3px rgba(244,63,94,0.1); 
+  }
+  .search-box button { 
+    padding: 0 20px; 
+    font-size: 15px; 
+    border: none; 
+    border-radius: 14px; 
+    background: #f43f5e; 
+    color: #fff; 
+    cursor: pointer; 
+    font-weight: bold;
+    touch-action: manipulation;
+    box-shadow: 0 4px 12px rgba(244,63,94,0.25);
+    transition: transform 0.1s;
+  }
+  .search-box button:active { 
+    transform: scale(0.96); 
+  }
+  
+  /* 搜尋結果列表 */
+  .guest-list { 
+    max-height: 200px; 
+    overflow-y: auto; 
+    border: 1px solid #f1f5f9; 
+    background: #fff; 
+    -webkit-overflow-scrolling: touch; 
+    border-radius: 12px;
+  }
+
+  .guest-item { 
+    padding: 12px 14px; 
+    border-bottom: 1px solid #f8fafc; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background: #fff; 
+    cursor: pointer; 
+    transition: background 0.15s;
+  }
+  .guest-item:hover { 
+    background: #f8fafc; 
+  }
+
+  /* 宴會廳主卡片 */
+  .card { 
+    background: #ffffff; 
+    border-radius: 20px; 
+    padding: 18px 14px 22px 14px; 
+    margin-bottom: 14px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+    width: 100%;
+    overflow: visible; 
+  }
+
+  /* 主舞台樣式 */
+  .stage {
+    background: radial-gradient(circle at 50% 30%, #ffe4e6 0%, #ffccd2 100%);
+    color: #e11d48;
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    letter-spacing: 3px;
+    width: 100%;
+    max-width: 260px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 0.5px solid #f43f5e;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .stage-dot {
+    width: 5px;
+    height: 5px;
+    background-color: #f43f5e;
+    border-radius: 50%;
+  }
+
+  /* 座位圖外框 */
+  .seating-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: visible; 
+    padding: 6px 4px;
+    position: relative;
+  }
+
+  .seating { 
+    display: flex; 
+    flex-direction: column; 
+    width: 100%;
+    max-width: 400px; 
+    margin: 0 auto;
+    gap: 8px; 
+    position: relative;
+    z-index: 2;
+  }
+
+  /* 標準 7 欄網格排版 */
+  .row { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    width: 100%; 
+    gap: 6px; 
+    align-items: center; 
+    justify-items: center; 
+  }
+
+  /* 座位圓圈樣式 */
+  .table { 
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    max-width: 44px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 50%; 
+    border: 1.5px solid #e2e8f0; 
+    background: #ffffff; 
+    font-size: clamp(9px, 2.7vw, 12px); 
+    font-weight: bold; 
+    color: #475569; 
+    text-align: center; 
+    position: relative;
+    transition: transform 0.15s ease, background 0.15s ease;
+    will-change: transform;
+  }
+
+  .table.main { 
+    max-width: 50px; 
+    border: 2px solid #ff607a;
+    background: radial-gradient(circle at 60% 30%, #ffb6c1 0%, #ff6b81 100%);
+    box-shadow: 0 3px 10px rgba(244, 63, 94, 0.35);
+    color: #ffffff;
+    font-size: clamp(10px, 2.9vw, 13px);
+  }
+  
+  .table.vip { 
+    max-width: 46px; 
+    border: 2px solid #8b5cf6;
+    background: radial-gradient(circle at 50% 30%, #d8b4fe 0%, #7c3aed 100%);
+    box-shadow: 0 3px 10px rgba(139, 92, 246, 0.35);
+    color: #ffffff;
+    font-size: clamp(10px, 2.8vw, 12px);
+  }
+
+  .table.aisle-space, .table.empty { 
+    border: none; 
+    background: transparent; 
+    pointer-events: none; 
+    box-shadow: none;
+  }
+  .table.empty {
+    visibility: hidden;
+  }
+
+  .table.highlight { 
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important; 
+    color: white !important; 
+    border-width: 1.8px !important;
+    border-style: solid !important;
+    border-color: #ffffff !important;
+    transform: scale(1.08);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 3px rgba(0, 0, 0, 0.15) !important; 
+    z-index: 30; 
+  }
+
+  .badge { 
+    padding: 3px 8px; 
+    border-radius: 6px; 
+    color: white; 
+    font-size: 11px; 
+    font-weight: bold; 
+  }
+  .badge.main { background: #f43f5e; }
+  .badge.vip { background: #8b5cf6; }
+  .badge.normal { background: #3b82f6; }
+
+  .legend-box {
+    display: flex; 
+    justify-content: center; 
+    gap: 10px; 
+    margin-top: 16px; 
+    font-size: 11px; 
+    color: #64748b; 
+    flex-wrap: wrap;
+  }
+  .legend-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 4px; 
+    font-weight: 500; 
+  }
+  .legend-dot { 
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+  }
+
+  /* 小遊戲畫面專屬樣式 */
+  #gameContainer {
+    display: none;
+    touch-action: none;
+  }
+
+  footer {
+    text-align: center; 
+    font-size: 11px; 
+    color: #94a3b8; 
+    margin: 16px 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 上方標題與資訊區塊 -->
+  <div class="header-card">
+    <h1 class="header-title">駿葳 & 泯霏</h1>
+    <div style="font-size: 15px; font-weight: 700; color: #ffffff; margin-top: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">婚宴座位查詢系統</div>
+    <div class="header-subtitle">歡迎蒞臨！請輸入您的姓名、或桌號</div>
+  </div>
+
+  <!-- 搜尋框卡片 -->
+  <div class="search-card">
+    <h3 style="margin:0 0 10px 0; font-size: 15px; color: #334155;">🔍 賓客座位查詢</h3>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="請輸入姓名、或桌號" oninput="debounceSearch()" onkeypress="if(event.key==='Enter') searchGuest()" enterkeyhint="search">
+      <button onclick="searchGuest()">查詢</button>
+    </div>
+    <div id="resultContainer" style="margin-top: 12px;"></div>
+  </div>
+
+  <!-- 宴會廳平面圖獨立區塊 -->
+  <div class="card" id="seatingCard">
+    <div style="margin-bottom: 12px;">
+      <h3 style="margin:0; font-size: 15px; color: #334155; display: flex; align-items: center; gap: 6px;">🗺️ 宴會廳座位平面圖</h3>
+    </div>
+
+    <div class="stage">
+      <span class="stage-dot"></span>
+      主舞台
+      <span class="stage-dot"></span>
+    </div>
+
+    <div class="seating-wrapper">
+      <div class="seating" id="seatingLayout"></div>
+    </div>
+    
+    <div class="legend-box">
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b81;"></div>主桌</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7c3aed;"></div>貴賓</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fff; border:1.5px solid #cbd5e1;"></div>嘉賓</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>查詢定位</div>
+    </div>
+  </div>
+
+  <!-- 貪吃蛇小遊戲區塊 (預設隱藏) -->
+  <div class="card" id="gameContainer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="margin:0; font-size: 15px; color: #334155; display: flex; align-items: center; gap: 6px;">💍 找回新娘的禮物</h3>
+      <button onclick="exitGame()" style="background: #e2e8f0; border: none; padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: bold; color: #475569; cursor: pointer;">返回座位圖</button>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; font-weight: bold; color: #64748b;">
+      <div>已尋獲禮物: <span id="snakeScore" style="color: #f43f5e; font-size: 18px;">0</span> 件</div>
+      <div>幫新娘找回遺失的捧花與鑽戒！</div>
+    </div>
+
+    <div style="position: relative; width: 100%; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 360px; margin: 0 auto;"></canvas>
+      
+      <!-- 遊戲結束蓋板 (Game Over Overlay) -->
+      <div id="gameOverOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10;">
+        <div style="font-size: 24px; font-weight: 800; color: #f43f5e; margin-bottom: 8px; letter-spacing: 2px;">未找齊禮物！</div>
+        <div style="font-size: 14px; color: #cbd5e1; margin-bottom: 16px;">總共尋獲: <span id="finalScore" style="color: #fff; font-weight: bold;">0</span> 件禮物</div>
+        <button onclick="restartSnakeGame()" style="background: #f43f5e; color: white; border: none; padding: 12px 28px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4);">重新尋找</button>
+      </div>
+    </div>
+
+    <!-- 手機螢幕虛擬方向鍵 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 300px; margin: 18px auto 0 auto; touch-action: manipulation;">
+      <div></div>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('UP');" onclick="setSnakeDir('UP')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
+        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▲</span>
+      </button>
+      <div></div>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('LEFT');" onclick="setSnakeDir('LEFT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
+        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">◀</span>
+      </button>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('DOWN');" onclick="setSnakeDir('DOWN')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
+        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▼</span>
+      </button>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('RIGHT');" onclick="setSnakeDir('RIGHT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
+        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▶</span>
+      </button>
+    </div>
+  </div>
+
+  <footer>吸引力國際股份有限公司 活動用 · 座位查詢系統</footer>
+</div>
+
+<script>
+let quests = [];
+
+/* 標準 7 欄網格座位對應陣列 */
+const seatingLayoutData = [
+  ['', '貴賓A', '', '主桌', '', '貴賓B', '貴賓C'],
+  ['01', '02', '03', 'aisle', '04', '05', '06'],
+  ['07', '08', '09', 'aisle', '10', '11', '12'],
+  ['13', '14', '15', 'aisle', '16', '17', '18'],
+  ['19', '20', '21', 'aisle', '22', '23', '24'],
+  ['25', '26', '27', 'aisle', '28', '29', '30'],
+  ['31', '32', '33', 'aisle', '34', '35', '36'],
+  ['37', '38', '39', 'aisle', '40', '41', '42'],
+  ['43', '44', '45', 'aisle', '46', '47', '48'],
+  ['', '49', '50', '51', '52', '53', '54']
+];
+
+async function loadQuestData() {
+  try {
+    const response = await fetch('quests.csv'); 
+    if (!response.ok) throw new Error();
+    const csvText = await response.text();
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
+    quests = lines.slice(1).map(line => {
+      const columns = line.split(',').map(c => c.trim());
+      return { name: columns[0], table: columns[1], count: parseInt(columns[2]) || 1, note: columns[3] || '' };
+    });
+  } catch (err) {
+    quests = [
+      { name: "王小明", table: "05", count: 1, note: "素食" },
+      { name: "張麗華", table: "主桌", count: 2, note: "" },
+      { name: "李大同", table: "貴賓A", count: 1, note: "" },
+      { name: "陳美麗", table: "貴賓B", count: 2, note: "" },
+      { name: "測試一號", table: "01", count: 1, note: "" },
+      { name: "測試九號", table: "09", count: 1, note: "" }
+    ];
+  }
+  renderSeatingLayout([]);
+}
+
+/* 防抖動 (Debounce) 機制：防止連續輸入造成頻繁觸發運算 */
+let searchTimeout = null;
+function debounceSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchGuest();
+  }, 150);
+}
+
+function searchGuest() {
+  let query = document.getElementById('searchInput').value.trim();
+  const container = document.getElementById('resultContainer');
+  
+  if (!query) {
+    container.innerHTML = '';
+    highlightTables([]);
+    return;
+  }
+  
+  if (query.toLowerCase() === 'game') {
+    startSnakeGame();
+    return;
+  }
+
+  let upperQuery = query.toUpperCase();
+
+  const results = quests.filter(q => {
+    let qName = q.name;
+    let qTable = q.table.toUpperCase();
+
+    let isNumericQuery = /^\d+$/.test(query);
+
+    if (isNumericQuery) {
+      let queryNum = parseInt(query, 10);
+      let tableNum = parseInt(qTable, 10);
+      return !isNaN(tableNum) && tableNum === queryNum;
+    } else {
+      let isNameMatch = qName.toUpperCase().includes(upperQuery);
+      let isTableMatch = (qTable === upperQuery);
+      return isNameMatch || isTableMatch;
+    }
+  });
+
+  if (results.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:#64748b; padding: 10px; font-size: 14px;">查無 "${query}" 的相關座位資訊</div>`;
+    highlightTables([]);
+  } else {
+    container.innerHTML = `
+      <div class="guest-list">
+        ${results.map(q => {
+          const badgeClass = q.table.includes('主桌') ? 'main' : (q.table.includes('貴賓') ? 'vip' : 'normal');
+          return `<div class="guest-item" onclick="selectGuest('${q.name}')">
+            <div><span style="font-weight:600; color:#1e293b; font-size: 14px;">${q.name}</span> <small style="color:#64748b;">(${q.count}位)</small></div>
+            <span class="badge ${badgeClass}">${q.table}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    highlightTables([...new Set(results.map(r => r.table))]);
+  }
+}
+
+function selectGuest(name) {
+  document.getElementById('searchInput').value = name;
+  searchGuest();
+}
+
+/* 高效渲染平面圖：在記憶體組合字串後一次性更新 DOM，大幅降低重繪開銷 */
+function renderSeatingLayout(highlightSet = []) {
+  const seatingDiv = document.getElementById('seatingLayout');
+  let html = '';
+  
+  for (let r = 0; r < seatingLayoutData.length; r++) {
+    html += `<div class="row">`;
+    const row = seatingLayoutData[r];
+    for (let c = 0; c < row.length; c++) {
+      let cell = row[c];
+      if (cell === '') {
+        html += `<div class="table empty"></div>`;
+      } else if (cell === 'aisle') {
+        html += `<div class="table aisle-space"></div>`;
+      } else {
+        let typeClass = '';
+        if (cell === '主桌') typeClass = 'main';
+        else if (cell.includes('貴賓')) typeClass = 'vip';
+
+        let isMatch = highlightSet.some(target => {
+          if (!isNaN(target) && !isNaN(cell)) {
+            return parseInt(target, 10) === parseInt(cell, 10);
+          }
+          return target.toUpperCase() === cell.toUpperCase();
+        });
+
+        let highlightClass = isMatch ? ' highlight' : '';
+        html += `<div class="table ${typeClass}${highlightClass}">${cell}</div>`;
+      }
+    }
+    html += `</div>`;
+  }
+  seatingDiv.innerHTML = html;
+}
+
+function highlightTables(targetTables) {
+  renderSeatingLayout(targetTables);
+}
+
+/* 頁面載入時初始化座位圖與資料快取 */
+window.addEventListener('DOMContentLoaded', () => {
+  loadQuestData();
+});
+
+/* 貪吃蛇小遊戲邏輯與滑動支援 */
+let snakeInterval = null;
+let snake = [];
+let food = {};
+let direction = 'RIGHT';
+let nextDirection = 'RIGHT';
+let snakeScore = 0;
+let isGameOver = false;
+const gridSize = 16;
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const gameBox = document.getElementById('snakeCanvas');
+  if (gameBox) {
+    gameBox.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    }, {passive: true});
+
+    gameBox.addEventListener('touchmove', e => {
+      if (document.getElementById('gameContainer').style.display === 'block') {
+        e.preventDefault();
+      }
+    }, {passive: false});
+
+    gameBox.addEventListener('touchend', e => {
+      if (!touchStartX || !touchStartY) return;
+      let touchEndX = e.changedTouches[0].clientX;
+      let touchEndY = e.changedTouches[0].clientY;
+
+      let diffX = touchEndX - touchStartX;
+      let diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 30) setSnakeDir('RIGHT');
+        else if (diffX < -30) setSnakeDir('LEFT');
+      } else {
+        if (diffY > 30) setSnakeDir('DOWN');
+        else if (diffY < -30) setSnakeDir('UP');
+      }
+      touchStartX = 0;
+      touchStartY = 0;
+    }, {passive: true});
+  }
+});
+
+function startSnakeGame() {
+  document.getElementById('seatingCard').style.display = 'none';
+  document.getElementById('resultContainer').innerHTML = '';
+  document.getElementById('gameContainer').style.display = 'block';
+  document.getElementById('gameOverOverlay').style.display = 'none';
+
+  const canvas = document.getElementById('snakeCanvas');
+  canvas.width = 320;
+  canvas.height = 320;
+
+  snake = [
+    {x: 8, y: 8},
+    {x: 7, y: 8},
+    {x: 6, y: 8}
+  ];
+  direction = 'RIGHT';
+  nextDirection = 'RIGHT';
+  snakeScore = 0;
+  isGameOver = false;
+  document.getElementById('snakeScore').textContent = snakeScore;
+
+  spawnFood();
+
+  if (snakeInterval) clearInterval(snakeInterval);
+  snakeInterval = setInterval(updateSnakeGame, 180);
+}
+
+function restartSnakeGame() {
+  document.getElementById('gameOverOverlay').style.display = 'none';
+  snake = [
+    {x: 8, y: 8},
+    {x: 7, y: 8},
+    {x: 6, y: 8}
+  ];
+  direction = 'RIGHT';
+  nextDirection = 'RIGHT';
+  snakeScore = 0;
+  isGameOver = false;
+  document.getElementById('snakeScore').textContent = snakeScore;
+  spawnFood();
+  if (snakeInterval) clearInterval(snakeInterval);
+  snakeInterval = setInterval(updateSnakeGame, 180);
+}
+
+function exitGame() {
+  if (snakeInterval) clearInterval(snakeInterval);
+  document.getElementById('gameContainer').style.display = 'none';
+  document.getElementById('seatingCard').style.display = 'block';
+  document.getElementById('searchInput').value = '';
+}
+
+function setSnakeDir(dir) {
+  if (isGameOver) return;
+  if (dir === 'UP' && direction !== 'DOWN') nextDirection = 'UP';
+  if (dir === 'DOWN' && direction !== 'UP') nextDirection = 'DOWN';
+  if (dir === 'LEFT' && direction !== 'RIGHT') nextDirection = 'LEFT';
+  if (dir === 'RIGHT' && direction !== 'LEFT') nextDirection = 'RIGHT';
+}
+
+window.addEventListener('keydown', e => {
+  if (document.getElementById('gameContainer').style.display === 'block') {
+    if (e.key === 'ArrowUp') setSnakeDir('UP');
+    if (e.key === 'ArrowDown') setSnakeDir('DOWN');
+    if (e.key === 'ArrowLeft') setSnakeDir('LEFT');
+    if (e.key === 'ArrowRight') setSnakeDir('RIGHT');
+  }
+});
+
+function spawnFood() {
+  let valid = false;
+  while (!valid) {
+    const rand = Math.random();
+    let type = 'gift';
+    if (rand < 0.35) type = 'ring';
+    else if (rand < 0.7) type = 'bouquet';
+    else type = 'gift';
+
+    food = {
+      x: Math.floor(Math.random() * gridSize),
+      y: Math.floor(Math.random() * gridSize),
+      type: type
+    };
+    valid = !snake.some(segment => segment.x === food.x && segment.y === food.y);
+  }
+}
+
+function updateSnakeGame() {
+  if (isGameOver) return;
+
+  direction = nextDirection;
+  let head = {x: snake[0].x, y: snake[0].y};
+
+  if (direction === 'UP') head.y--;
+  if (direction === 'DOWN') head.y++;
+  if (direction === 'LEFT') head.x--;
+  if (direction === 'RIGHT') head.x++;
+
+  if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize || snake.some(s => s.x === head.x && s.y === head.y)) {
+    isGameOver = true;
+    clearInterval(snakeInterval);
+    document.getElementById('finalScore').textContent = snakeScore;
+    document.getElementById('gameOverOverlay').style.display = 'flex';
+    return;
+  }
+
+  snake.unshift(head);
+
+  if (head.x === food.x && head.y === food.y) {
+    snakeScore += (food.type === 'ring' ? 3 : (food.type === 'bouquet' ? 2 : 1));
+    document.getElementById('snakeScore').textContent = snakeScore;
+    spawnFood();
+  } else {
+    snake.pop();
+  }
+
+  drawSnakeGame();
+}
+
+function drawSnakeGame() {
+  const canvas = document.getElementById('snakeCanvas');
+  const ctx = canvas.getContext('2d');
+  const tileSize = canvas.width / gridSize;
+
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < gridSize; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * tileSize, 0);
+    ctx.lineTo(i * tileSize, canvas.height);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i * tileSize);
+    ctx.lineTo(canvas.width, i * tileSize);
+    ctx.stroke();
+  }
+
+  ctx.font = `${tileSize * 0.8}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = food.type === 'ring' ? 'rgba(56, 189, 248, 0.8)' : (food.type === 'bouquet' ? 'rgba(244, 63, 94, 0.8)' : 'rgba(234, 179, 8, 0.8)');
+  ctx.shadowBlur = 10;
+  
+  let foodEmoji = '🎁';
+  if (food.type === 'ring') foodEmoji = '💍';
+  else if (food.type === 'bouquet') foodEmoji = '💐';
+
+  ctx.fillText(
+    foodEmoji,
+    (food.x + 0.5) * tileSize,
+    (food.y + 0.5) * tileSize
+  );
+  ctx.shadowBlur = 0;
+
+  snake.forEach((segment, index) => {
+    const x = segment.x * tileSize;
+    const y = segment.y * tileSize;
+    const padding = 2;
+    const size = tileSize - padding * 2;
+    const radius = 8;
+
+    if (index === 0) {
+      ctx.save();
+      ctx.translate(x + tileSize / 2, y + tileSize / 2);
+
+      let angle = 0;
+      if (direction === 'UP') angle = -Math.PI / 2;
+      else if (direction === 'DOWN') angle = Math.PI / 2;
+      else if (direction === 'LEFT') angle = Math.PI;
+      else if (direction === 'RIGHT') angle = 0;
+      ctx.rotate(angle);
+
+      const headGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, tileSize / 2);
+      headGrad.addColorStop(0, '#ff758c');
+      headGrad.addColorStop(1, '#ff7eb3');
+      ctx.fillStyle = headGrad;
+
+      ctx.beginPath();
+      ctx.roundRect(-size / 2, -size / 2, size, size, [radius, radius, radius, radius]);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(size * 0.15, -size * 0.22, 3.5, 0, Math.PI * 2);
+      ctx.arc(size * 0.15, size * 0.22, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(size * 0.18, -size * 0.22, 1.5, 0, Math.PI * 2);
+      ctx.arc(size * 0.18, size * 0.22, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#e11d48';
+      ctx.beginPath();
+      ctx.arc(size * 0.45, 0, 2, -Math.PI / 2, Math.PI / 2);
+      ctx.fill();
+
+      ctx.restore();
+    } else {
+      const bodyGrad = ctx.createLinearGradient(x, y, x + tileSize, y + tileSize);
+      bodyGrad.addColorStop(0, index % 2 === 0 ? '#fb7185' : '#f43f5e');
+      bodyGrad.addColorStop(1, index % 2 === 0 ? '#f43f5e' : '#e11d48');
+      ctx.fillStyle = bodyGrad;
+
+      ctx.beginPath();
+      ctx.roundRect(x + padding, y + padding, size, size, radius - 2);
+      ctx.fill();
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.beginPath();
+      ctx.arc(x + tileSize * 0.35, y + tileSize * 0.35, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+}
+</script>
+</body>
+</html>
