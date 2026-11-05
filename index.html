@@ -465,7 +465,6 @@ function searchGuest() {
     return;
   }
   
-  // 輸入「婚禮」即自動觸發遊戲
   if (query === '婚禮') {
     startSnakeGame();
     return;
@@ -556,15 +555,15 @@ window.addEventListener('DOMContentLoaded', () => {
   loadQuestData();
 });
 
-/* 貪吃蛇小遊戲邏輯 (改用 requestAnimationFrame 確保多人工發與動畫絕對流暢不卡頓) */
+/* 貪吃蛇極致滑動與高FPS平滑運算引擎 */
 let animationFrameId = null;
 let lastUpdateTime = 0;
-const gameSpeed = 160; // 毫秒/格
+const gameSpeed = 150; // 移動一格毫秒數
 
 let snake = [];
 let food = {};
 let direction = 'RIGHT';
-let nextDirection = 'RIGHT';
+let directionQueue = []; // 輸入佇列：防止按太快卡頓或吃掉指令
 let snakeScore = 0;
 let isGameOver = false;
 const gridSize = 16;
@@ -619,7 +618,7 @@ function startSnakeGame() {
     {x: 6, y: 8}
   ];
   direction = 'RIGHT';
-  nextDirection = 'RIGHT';
+  directionQueue = [];
   snakeScore = 0;
   isGameOver = false;
   document.getElementById('snakeScore').textContent = snakeScore;
@@ -643,7 +642,7 @@ function restartSnakeGame() {
     {x: 6, y: 8}
   ];
   direction = 'RIGHT';
-  nextDirection = 'RIGHT';
+  directionQueue = [];
   snakeScore = 0;
   isGameOver = false;
   document.getElementById('snakeScore').textContent = snakeScore;
@@ -662,12 +661,20 @@ function exitGame() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* 多段式輸入佇列系統：確保連續轉向「濕滑」流暢、零延遲 */
 function setSnakeDir(dir) {
   if (isGameOver) return;
-  if (dir === 'UP' && direction !== 'DOWN') nextDirection = 'UP';
-  if (dir === 'DOWN' && direction !== 'UP') nextDirection = 'DOWN';
-  if (dir === 'LEFT' && direction !== 'RIGHT') nextDirection = 'LEFT';
-  if (dir === 'RIGHT' && direction !== 'LEFT') nextDirection = 'RIGHT';
+  const currentDir = directionQueue.length > 0 ? directionQueue[directionQueue.length - 1] : direction;
+  
+  if (dir === 'UP' && currentDir !== 'DOWN' && currentDir !== 'UP') {
+    directionQueue.push('UP');
+  } else if (dir === 'DOWN' && currentDir !== 'UP' && currentDir !== 'DOWN') {
+    directionQueue.push('DOWN');
+  } else if (dir === 'LEFT' && currentDir !== 'RIGHT' && currentDir !== 'LEFT') {
+    directionQueue.push('LEFT');
+  } else if (dir === 'RIGHT' && currentDir !== 'LEFT' && currentDir !== 'RIGHT') {
+    directionQueue.push('RIGHT');
+  }
 }
 
 window.addEventListener('keydown', e => {
@@ -697,14 +704,19 @@ function spawnFood() {
   }
 }
 
-/* 高效能遊戲主迴圈 (基於 requestAnimationFrame 與時間差控制) */
+/* 高效能雙重迴圈：requestAnimationFrame 負責渲染平滑度，計時器負責邏輯步進 */
 function gameLoop(timestamp) {
   if (isGameOver) return;
 
-  if (timestamp - lastUpdateTime >= gameSpeed) {
-    lastUpdateTime = timestamp;
+  const elapsed = timestamp - lastUpdateTime;
+  
+  if (elapsed >= gameSpeed) {
+    lastUpdateTime = timestamp - (elapsed % gameSpeed);
     updateSnakeGame();
   }
+
+  // 持續滿幀繪製，讓畫面動態保持絲滑
+  drawSnakeGame();
 
   if (!isGameOver) {
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -712,7 +724,10 @@ function gameLoop(timestamp) {
 }
 
 function updateSnakeGame() {
-  direction = nextDirection;
+  if (directionQueue.length > 0) {
+    direction = directionQueue.shift();
+  }
+
   let head = {x: snake[0].x, y: snake[0].y};
 
   if (direction === 'UP') head.y--;
@@ -737,8 +752,6 @@ function updateSnakeGame() {
   } else {
     snake.pop();
   }
-
-  drawSnakeGame();
 }
 
 function drawSnakeGame() {
@@ -746,7 +759,7 @@ function drawSnakeGame() {
   const ctx = canvas.getContext('2d');
   const tileSize = canvas.width / gridSize;
 
-  /* 改為溫潤明亮的淡粉色背景 */
+  /* 溫潤明亮的淡粉色背景 */
   ctx.fillStyle = '#fff1f2';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
