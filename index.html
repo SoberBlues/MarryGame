@@ -299,10 +299,11 @@
     border-radius: 50%; 
   }
 
-  /* 小遊戲畫面專屬樣式 */
+  /* 小遊戲畫面專屬樣式 (強制鎖定捲動) */
   #gameContainer {
     display: none;
     touch-action: none;
+    overflow: hidden;
   }
 
   footer {
@@ -370,7 +371,7 @@
     </div>
 
     <div style="position: relative; width: 100%; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
-      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 360px; margin: 0 auto; touch-action: none;"></canvas>
+      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 320px; margin: 0 auto; touch-action: none;"></canvas>
       
       <!-- 遊戲結束蓋板 (Game Over Overlay) -->
       <div id="gameOverOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10;">
@@ -380,25 +381,25 @@
       </div>
     </div>
 
-    <!-- 手機螢幕虛擬方向鍵 (已優化觸控與點擊雙重綁定) -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 300px; margin: 18px auto 0 auto; touch-action: manipulation;">
+    <!-- 手機螢幕虛擬方向鍵 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 280px; margin: 14px auto 0 auto; touch-action: none;">
       <div></div>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('UP');" onclick="setSnakeDir('UP')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
-        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▲</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('UP');" onclick="setSnakeDir('UP')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 20px; padding: 16px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▲</span>
       </button>
       <div></div>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('LEFT');" onclick="setSnakeDir('LEFT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
-        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">◀</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('LEFT');" onclick="setSnakeDir('LEFT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 20px; padding: 16px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">◀</span>
       </button>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('DOWN');" onclick="setSnakeDir('DOWN')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
-        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▼</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('DOWN');" onclick="setSnakeDir('DOWN')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 20px; padding: 16px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▼</span>
       </button>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('RIGHT');" onclick="setSnakeDir('RIGHT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
-        <span style="font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▶</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('RIGHT');" onclick="setSnakeDir('RIGHT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 20px; padding: 16px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▶</span>
       </button>
     </div>
   </div>
@@ -446,7 +447,7 @@ async function loadQuestData() {
   renderSeatingLayout([]);
 }
 
-/* 防抖動 (Debounce) 機制：防止連續輸入造成頻繁觸發運算 */
+/* 防抖動 (Debounce) 機制 */
 let searchTimeout = null;
 function debounceSearch() {
   clearTimeout(searchTimeout);
@@ -512,7 +513,7 @@ function selectGuest(name) {
   searchGuest();
 }
 
-/* 高效渲染平面圖：在記憶體組合字串後一次性更新 DOM，大幅降低重繪開銷 */
+/* 高效渲染平面圖 */
 function renderSeatingLayout(highlightSet = []) {
   const seatingDiv = document.getElementById('seatingLayout');
   let html = '';
@@ -551,9 +552,18 @@ function highlightTables(targetTables) {
   renderSeatingLayout(targetTables);
 }
 
-/* 頁面載入時初始化座位圖與資料快取 */
 window.addEventListener('DOMContentLoaded', () => {
   loadQuestData();
+
+  // 攔截整個遊戲容器內的 touchmove 預設滾動行為，徹底解決手機端滑動畫布時畫面上下捲動的問題
+  const gameContainer = document.getElementById('gameContainer');
+  if (gameContainer) {
+    gameContainer.addEventListener('touchmove', function(e) {
+      if (gameContainer.style.display === 'block') {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
 });
 
 /* 貪吃蛇小遊戲邏輯與滑動支援 */
@@ -580,9 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, {passive: true});
 
     gameBox.addEventListener('touchmove', e => {
-      if (document.getElementById('gameContainer').style.display === 'block') {
-        e.preventDefault();
-      }
+      e.preventDefault();
     }, {passive: false});
 
     gameBox.addEventListener('touchend', e => {
