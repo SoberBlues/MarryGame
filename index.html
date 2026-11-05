@@ -370,7 +370,7 @@
     </div>
 
     <div style="position: relative; width: 100%; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
-      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 360px; margin: 0 auto;"></canvas>
+      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 360px; margin: 0 auto; touch-action: none;"></canvas>
       
       <!-- 遊戲結束蓋板 (Game Over Overlay) -->
       <div id="gameOverOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10;">
@@ -380,7 +380,7 @@
       </div>
     </div>
 
-    <!-- 手機螢幕虛擬方向鍵 -->
+    <!-- 手機螢幕虛擬方向鍵 (已優化觸控與點擊雙重綁定) -->
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 300px; margin: 18px auto 0 auto; touch-action: manipulation;">
       <div></div>
       <button ontouchstart="event.preventDefault(); setSnakeDir('UP');" onclick="setSnakeDir('UP')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 24px; padding: 20px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 6px 16px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
