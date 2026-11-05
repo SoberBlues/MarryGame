@@ -108,29 +108,6 @@
   .search-box button:active { 
     transform: scale(0.96); 
   }
-
-  /* 遊戲快速啟動按鈕樣式 */
-  .game-btn {
-    width: 100%;
-    margin-top: 12px;
-    padding: 12px;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
-    color: white;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: transform 0.1s, opacity 0.2s;
-  }
-  .game-btn:active {
-    transform: scale(0.97);
-  }
   
   /* 搜尋結果列表 */
   .guest-list { 
@@ -353,10 +330,6 @@
       <input type="text" id="searchInput" placeholder="請輸入姓名、或桌號" oninput="debounceSearch()" onkeypress="if(event.key==='Enter') searchGuest()" enterkeyhint="search">
       <button onclick="searchGuest()">查詢</button>
     </div>
-    <!-- 新增：點擊直接開始遊戲按鈕 -->
-    <button class="game-btn" onclick="startSnakeGame()">
-      <span>🎮 點擊開始新娘小遊戲</span>
-    </button>
     <div id="resultContainer" style="margin-top: 12px;"></div>
   </div>
 
@@ -492,6 +465,7 @@ function searchGuest() {
     return;
   }
   
+  // 輸入「婚禮」即自動觸發遊戲
   if (query === '婚禮') {
     startSnakeGame();
     return;
