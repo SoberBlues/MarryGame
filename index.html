@@ -14,7 +14,8 @@
   body {
     margin: 0;
     padding: 12px;
-    padding-bottom: env(safe-area-inset-bottom, 20px);
+    /* 關鍵：完美適配所有手機底部的安全距離與導覽列 */
+    padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 30px);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     background-color: #f8fafc;
     min-height: 100vh;
@@ -299,11 +300,12 @@
     border-radius: 50%; 
   }
 
-  /* 小遊戲畫面專屬樣式 (鎖定捲動並完美適配手機高度) */
+  /* 小遊戲畫面專屬樣式 (專為行動裝置高度最佳化) */
   #gameContainer {
     display: none;
     touch-action: none;
     overflow: hidden;
+    padding-bottom: 12px;
   }
 
   footer {
@@ -360,46 +362,47 @@
 
   <!-- 貪吃蛇小遊戲區塊 (預設隱藏) -->
   <div class="card" id="gameContainer">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <h3 style="margin:0; font-size: 15px; color: #334155; display: flex; align-items: center; gap: 6px;">💍 找回新娘的禮物</h3>
-      <button onclick="exitGame()" style="background: #e2e8f0; border: none; padding: 5px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; color: #475569; cursor: pointer;">返回座位圖</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <h3 style="margin:0; font-size: 14px; color: #334155; display: flex; align-items: center; gap: 6px;">💍 找回新娘的禮物</h3>
+      <button onclick="exitGame()" style="background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; color: #475569; cursor: pointer;">返回座位圖</button>
     </div>
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; font-weight: bold; color: #64748b;">
-      <div>已尋獲: <span id="snakeScore" style="color: #f43f5e; font-size: 16px;">0</span> 件</div>
+      <div>已尋獲: <span id="snakeScore" style="color: #f43f5e; font-size: 15px;">0</span> 件</div>
       <div>幫新娘找回捧花與鑽戒！</div>
     </div>
 
     <div style="position: relative; width: 100%; background: #0f172a; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
-      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 250px; margin: 0 auto; touch-action: none;"></canvas>
+      <!-- 微調畫布尺寸以適應各種手機高度 -->
+      <canvas id="snakeCanvas" style="display: block; width: 100%; height: auto; aspect-ratio: 1/1; max-width: 220px; margin: 0 auto; touch-action: none;"></canvas>
       
       <!-- 遊戲結束蓋板 (Game Over Overlay) -->
       <div id="gameOverOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10;">
-        <div style="font-size: 22px; font-weight: 800; color: #f43f5e; margin-bottom: 6px; letter-spacing: 2px;">未找齊禮物！</div>
+        <div style="font-size: 20px; font-weight: 800; color: #f43f5e; margin-bottom: 6px; letter-spacing: 2px;">未找齊禮物！</div>
         <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px;">總共尋獲: <span id="finalScore" style="color: #fff; font-weight: bold;">0</span> 件禮物</div>
         <button onclick="restartSnakeGame()" style="background: #f43f5e; color: white; border: none; padding: 10px 24px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4);">重新尋找</button>
       </div>
     </div>
 
-    <!-- 手機螢幕虛擬方向鍵 (調整尺寸以確保手機完整顯示) -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 240px; margin: 10px auto 0 auto; touch-action: none;">
+    <!-- 手機螢幕虛擬方向鍵 (安全距離包覆，確保不被瀏覽器擋住) -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 230px; margin: 8px auto 0 auto; touch-action: none;">
       <div></div>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('UP');" onclick="setSnakeDir('UP')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 16px; padding: 12px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
-        <span style="font-size: 22px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 12px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▲</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('UP');" onclick="setSnakeDir('UP')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 14px; padding: 10px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 3px 8px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 18px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 11px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▲</span>
       </button>
       <div></div>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('LEFT');" onclick="setSnakeDir('LEFT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 16px; padding: 12px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
-        <span style="font-size: 22px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 12px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">◀</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('LEFT');" onclick="setSnakeDir('LEFT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 14px; padding: 10px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 3px 8px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 18px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 11px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">◀</span>
       </button>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('DOWN');" onclick="setSnakeDir('DOWN')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 16px; padding: 12px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
-        <span style="font-size: 22px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 12px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▼</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('DOWN');" onclick="setSnakeDir('DOWN')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 14px; padding: 10px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 3px 8px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 18px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 11px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▼</span>
       </button>
-      <button ontouchstart="event.preventDefault(); setSnakeDir('RIGHT');" onclick="setSnakeDir('RIGHT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 16px; padding: 12px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
-        <span style="font-size: 22px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
-        <span style="position: absolute; font-size: 12px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▶</span>
+      <button ontouchstart="event.preventDefault(); setSnakeDir('RIGHT');" onclick="setSnakeDir('RIGHT')" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); border: none; border-radius: 14px; padding: 10px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 3px 8px rgba(244,63,94,0.4); display: flex; align-items: center; justify-content: center; position: relative; touch-action: none;">
+        <span style="font-size: 18px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️</span>
+        <span style="position: absolute; font-size: 11px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">▶</span>
       </button>
     </div>
   </div>
@@ -466,7 +469,7 @@ function searchGuest() {
     return;
   }
   
-  // 改為輸入「婚禮」即可啟動小遊戲
+  // 輸入「婚禮」即可啟動小遊戲
   if (query === '婚禮') {
     startSnakeGame();
     return;
@@ -621,8 +624,8 @@ function startSnakeGame() {
   document.getElementById('gameOverOverlay').style.display = 'none';
 
   const canvas = document.getElementById('snakeCanvas');
-  canvas.width = 280;
-  canvas.height = 280;
+  canvas.width = 240;
+  canvas.height = 240;
 
   snake = [
     {x: 8, y: 8},
